@@ -2,7 +2,7 @@
   "name": "dsh-go-workbuddy",
   "displayName": "DSH Go WorkBuddy",
   "description": "在 DSH Go 中使用 WorkBuddy 模型，提供原生授权、积分余额和消耗明细面板，并支持直接对话。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "ZhaoZiyangShaanxi",
   "copyright": "Copyright (c) 2026 LaoDing",
   "license": "MIT",

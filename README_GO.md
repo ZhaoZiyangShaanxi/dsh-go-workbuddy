@@ -13,13 +13,13 @@
 
 ## 安装
 
-要求 DSH Go 的本机引擎及 DSH `>=0.2.1-rc.2 <0.3.0-0`。市场收录后可在插件市场安装；也可在 DSH Go 的本机终端执行：
+要求 DSH Go 的本机引擎及 DSH `>=0.2.1-rc.2 <0.3.0-0`。目前请从 [GitHub Releases](https://github.com/ZhaoZiyangShaanxi/dsh-go-workbuddy/releases) 下载 `dsh-go-workbuddy-0.1.1.tgz` 并放入手机的 Download 目录，然后在 DSH Go 的本机终端执行：
 
 ```sh
-dsh plugin --profile web add dsh-go-workbuddy@0.1.0
+dsh plugin --profile web add /sdcard/Download/dsh-go-workbuddy-0.1.1.tgz
 ```
 
-也可以把 `dsh-go-workbuddy-0.1.0.tgz` 放到手机可访问的位置，使用 `dsh plugin --profile web add <包路径>` 安装。已安装 `dsh-connect-workbuddy` 时，请先卸载它，再安装本包；两者注册相同的 WorkBuddy provider，不应同时启用。重新启动本机引擎后打开插件详情中的 WorkBuddy 面板。
+若手机终端无法读取 `/sdcard/Download`，请在 DSH Go 设置中开启访问手机文件，或把包复制进本机 Linux 环境并用该路径安装。npm 发布和市场收录完成后，也可使用 `dsh plugin --profile web add dsh-go-workbuddy@0.1.1`。已安装 `dsh-connect-workbuddy` 时，请先卸载它，再安装本包；两者注册相同的 WorkBuddy provider，不应同时启用。重新启动本机引擎后打开插件详情中的 WorkBuddy 面板。
 
 源码构建：`pnpm install --frozen-lockfile && pnpm run check && pnpm pack`。
 

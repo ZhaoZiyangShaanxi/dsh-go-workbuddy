@@ -1,5 +1,5 @@
 diff --git a/app/lib/ui/plugins/native/native_taps.dart b/app/lib/ui/plugins/native/native_taps.dart
-index 3ea62e14..550d0338 100644
+index 3ea62e14..e3a525ac 100644
 --- a/app/lib/ui/plugins/native/native_taps.dart
 +++ b/app/lib/ui/plugins/native/native_taps.dart
 @@ -690,7 +690,12 @@ Future<void> _runEffect(
@@ -44,7 +44,7 @@ index 3ea62e14..550d0338 100644
  
 +/// Only WorkBuddy's state-bound login page may use the in-app browser.
 +bool isWorkBuddyInAppLoginLink(String package, Uri url) =>
-+    package == 'dsh-connect-workbuddy' &&
++    const {'dsh-connect-workbuddy', 'dsh-go-workbuddy'}.contains(package) &&
 +    url.scheme == 'https' &&
 +    url.userInfo.isEmpty &&
 +    (!url.hasPort || url.port == 443) &&
@@ -66,20 +66,22 @@ index 3ea62e14..550d0338 100644
    final heading = wants.contains('message')
 diff --git a/app/test/plugins/native/workbuddy_login_link_test.dart b/app/test/plugins/native/workbuddy_login_link_test.dart
 new file mode 100644
-index 00000000..a7e01a05
+index 00000000..c11835fc
 --- /dev/null
 +++ b/app/test/plugins/native/workbuddy_login_link_test.dart
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,43 @@
 +import 'package:dsh_app/ui/plugins/native/native_taps.dart';
 +import 'package:flutter_test/flutter_test.dart';
 +
 +void main() {
 +  test('WorkBuddy state-bound login stays inside DSH Go', () {
-+    for (final host in ['www.codebuddy.cn', 'www.workbuddy.ai', 'www.codebuddy.ai']) {
-+      expect(
-+        isWorkBuddyInAppLoginLink('dsh-connect-workbuddy', Uri.parse('https://$host/login?state=abc')),
-+        isTrue,
-+      );
++    for (final package in ['dsh-connect-workbuddy', 'dsh-go-workbuddy']) {
++      for (final host in ['www.codebuddy.cn', 'www.workbuddy.ai', 'www.codebuddy.ai']) {
++        expect(
++          isWorkBuddyInAppLoginLink(package, Uri.parse('https://$host/login?state=abc')),
++          isTrue,
++        );
++      }
 +    }
 +  });
 +

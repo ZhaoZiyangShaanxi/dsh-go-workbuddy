@@ -114,7 +114,7 @@ interface Mounted {
 }
 
 function mount(script: {
-  first: () => Promise<WorkBuddyChatResult>
+  first: (signal?: AbortSignal) => Promise<WorkBuddyChatResult>
 }): Mounted {
   const sent: string[] = []
   let afterAbort = 0
@@ -134,7 +134,7 @@ function mount(script: {
           afterAbort += 1
           return transportedAbort()
         }
-        if (sent.length === 1) return script.first()
+        if (sent.length === 1) return script.first(signal)
         return channelReject()
       },
     } as unknown as WorkBuddyUpstreamClient,
@@ -156,7 +156,7 @@ function mount(script: {
  */
 async function chatThenHangUp(
   instance: WorkBuddyShim,
-  onFirstAttemptInFlight: () => void,
+  firstAttemptInFlight: Promise<void>,
 ): Promise<{ received: string }> {
   await instance.ready
   const url = new URL(instance.baseUrl())
@@ -176,11 +176,7 @@ async function chatThenHangUp(
     + `Content-Length: ${Buffer.byteLength(REQUESTED_BODY)}\r\n\r\n${REQUESTED_BODY}`,
   )
 
-  onFirstAttemptInFlight()
-  // Let the first attempt be refused and the close event land before the hang-up
-  // is released, so the guard is evaluated against an aborted signal rather than
-  // racing it.
-  await new Promise(resolve => setTimeout(resolve, 60))
+  await firstAttemptInFlight
   socket.destroy()
   await new Promise(resolve => setTimeout(resolve, 150))
   return { received }
@@ -194,16 +190,19 @@ describe('issue #159: the abort gate protects the DIAGNOSIS, not just quota', ()
     let releaseFirst: () => void = () => {}
     const firstInFlight = new Promise<void>(resolve => { releaseFirst = resolve })
     const mounted = mount({
-      first: async () => {
+      first: async signal => {
         releaseFirst()
-        // Hold the attempt open so the hang-up lands while it is in flight.
-        await new Promise(resolve => setTimeout(resolve, 80))
+        // Hold the attempt until the server observes the socket hang-up.
+        if (!signal) throw new Error('expected request abort signal')
+        if (!signal.aborted) {
+          await new Promise<void>(resolve => signal.addEventListener('abort', () => resolve(), { once: true }))
+        }
         return channelReject()
       },
     })
     shim = mounted.instance
 
-    await chatThenHangUp(shim, () => {})
+    await chatThenHangUp(shim, firstInFlight)
 
     // The reader is gone, so no reply is inspectable — but what matters is that
     // the shim did NOT spend a rescue on a dead socket and did NOT mis-book the

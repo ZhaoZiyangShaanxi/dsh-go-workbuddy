@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-go-workbuddy",
+    "description": "Use WorkBuddy models in DSH Go with native sign-in, credit balance and usage history panels. Supports CN and international accounts; model availability depends on the WorkBuddy catalog."
+  }
+}

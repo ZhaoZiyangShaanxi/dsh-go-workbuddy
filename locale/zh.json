@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-go-workbuddy",
+    "description": "在 DSH Go 中使用 WorkBuddy 模型，提供原生授权、积分余额和消耗明细面板。支持国内版与国际版账号；可用模型以 WorkBuddy 实际目录为准。"
+  }
+}

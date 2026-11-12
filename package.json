@@ -1,0 +1,154 @@
+{
+  "name": "dsh-go-workbuddy",
+  "displayName": "DSH Go WorkBuddy",
+  "description": "在 DSH Go 中使用 WorkBuddy 模型，提供原生授权、积分余额和消耗明细面板，并支持直接对话。",
+  "version": "0.1.0",
+  "author": "ZhaoZiyangShaanxi",
+  "copyright": "Copyright (c) 2026 LaoDing",
+  "license": "MIT",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "workbuddy",
+    "codebuddy",
+    "model-provider",
+    "credits"
+  ],
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": {
+    "dsh-connect-workbuddy": "lib/bin.js"
+  },
+  "icon": "icons/dsh-connect-workbuddy-128.png",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "3.18.4",
+    "qrcode": "^1.5.4"
+  },
+  "files": [
+    "lib",
+    "native",
+    "icons",
+    "locale",
+    "docs/assets",
+    "docs/PRIVACY.md",
+    "screenshots.json",
+    "cordis.patch.yml",
+    "README.md",
+    "README_GO.md",
+    "patches/DSH-Go-应用内授权.patch",
+    "README.en.md",
+    "CHANGELOG.md",
+    "THIRD_PARTY_NOTICES.md",
+    "docs/WINDOWS.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepare": "npm run build",
+    "prepack": "npm run build && node scripts/check-pii.mjs",
+    "build": "tsdown && node scripts/verify-entry-artifacts.mjs",
+    "verify:entries": "node scripts/verify-entry-artifacts.mjs",
+    "check:pii": "node scripts/check-pii.mjs",
+    "test": "vitest run",
+    "section:shot": "vitest run --config vitest.card.config.ts",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.client.json",
+    "check": "pnpm run typecheck && pnpm run build && pnpm run check:pii && pnpm run test"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-settings-plugins",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "dshGo": {
+    "v": 1,
+    "title": { "zh": "WorkBuddy", "en": "WorkBuddy" },
+    "icon": "coin",
+    "contributes": {
+      "composer.strip": [{ "id": "credits", "icon": "coin", "panel": "cn" }],
+      "panels": [
+        { "id": "cn", "title": { "zh": "国内版 WorkBuddy", "en": "WorkBuddy CN" }, "icon": "coin", "placement": ["features", "chat.panel", "plugin"], "presentation": "sheet" },
+        { "id": "global", "title": { "zh": "国际版 WorkBuddy", "en": "WorkBuddy Global" }, "icon": "globe", "placement": ["features", "chat.panel", "plugin"], "presentation": "sheet" }
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZhaoZiyangShaanxi/dsh-go-workbuddy.git"
+  },
+  "homepage": "https://github.com/ZhaoZiyangShaanxi/dsh-go-workbuddy#readme",
+  "bugs": {
+    "url": "https://github.com/ZhaoZiyangShaanxi/dsh-go-workbuddy/issues"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.1-rc.1 <5.0.0 || >=4.0.2 <5.0.0",
+    "@deepseek-ai/dsh-atomic-write": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-attachment": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-primitives": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-renderer": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-home-paths": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-host-webserver": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-llm": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-llm-pi-ai": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-settings": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/schemastery": ">=3.18.1-rc.1 <4.0.0 || >=3.18.2 <4.0.0",
+    "@earendil-works/pi-ai": ">=0.85.0 <0.88.0 || >=1.0.0-0 <2.0.0",
+    "react": "^18.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-ai": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.1 <5.0.0 || >=4.0.2 <5.0.0",
+    "@deepseek-ai/dsh-atomic-write": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-attachment": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-locale": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-primitives": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-renderer": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-settings-plugins": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-home-paths": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-host-webserver": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-llm": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-llm-pi-ai": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-settings": ">=0.1.7-rc.1 <0.3.0-0",
+    "@deepseek-ai/schemastery": ">=3.18.1 <4.0.0 || >=3.18.2 <4.0.0",
+    "@earendil-works/pi-ai": ">=0.85.0 <0.88.0 || >=1.0.0-0 <2.0.0",
+    "@types/node": "^22.20.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "~18.3.31",
+    "@types/react-dom": "18.3.7",
+    "jsdom": "^29.1.1",
+    "react": "^18.3.1",
+    "react-dom": "18.3.1",
+    "tsdown": "^0.22.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
+  }
+}

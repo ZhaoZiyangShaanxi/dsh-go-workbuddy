@@ -1,0 +1,113 @@
+diff --git a/app/lib/ui/plugins/native/native_taps.dart b/app/lib/ui/plugins/native/native_taps.dart
+index 3ea62e14..550d0338 100644
+--- a/app/lib/ui/plugins/native/native_taps.dart
++++ b/app/lib/ui/plugins/native/native_taps.dart
+@@ -690,7 +690,12 @@ Future<void> _runEffect(
+         await openNativePanel(context, target, sessionId: sessionId);
+       }
+     case LinkEffect(:final url):
+-      await openConfirmedLink(context, url, stillCurrent: stillCurrent);
++      await openConfirmedLink(
++        context,
++        url,
++        stillCurrent: stillCurrent,
++        inAppBrowser: isWorkBuddyInAppLoginLink(plugin.package, url),
++      );
+     case ToastEffect(:final text):
+       if (_toasts.allow(plugin.package, ref.read(nativeClockProvider)())) {
+         _toast(context, text);
+@@ -787,7 +792,12 @@ Future<void> openNativePage(BuildContext context, WidgetRef ref, String page, {S
+ }
+ 
+ /// An https page in the browser, after a confirmation that names its host.
+-Future<void> openConfirmedLink(BuildContext context, Uri url, {bool Function()? stillCurrent}) async {
++Future<void> openConfirmedLink(
++  BuildContext context,
++  Uri url, {
++  bool Function()? stillCurrent,
++  bool inAppBrowser = false,
++}) async {
+   if (url.scheme != 'https') return;
+   final l10n = context.l10n;
+   final ok = await showAppDialog<bool>(
+@@ -801,10 +811,32 @@ Future<void> openConfirmedLink(BuildContext context, Uri url, {bool Function()?
+     ),
+   );
+   if (ok == true && stillCurrent?.call() != false) {
+-    await launchUrl(url, mode: LaunchMode.externalApplication).catchError((_) => false);
++    await launchUrl(
++      url,
++      mode: inAppBrowser ? LaunchMode.inAppBrowserView : LaunchMode.externalApplication,
++    ).catchError((_) => false);
+   }
+ }
+ 
++/// Only WorkBuddy's state-bound login page may use the in-app browser.
++bool isWorkBuddyInAppLoginLink(String package, Uri url) =>
++    package == 'dsh-connect-workbuddy' &&
++    url.scheme == 'https' &&
++    url.userInfo.isEmpty &&
++    (!url.hasPort || url.port == 443) &&
++    url.path == '/login' &&
++    (url.queryParameters['state']?.isNotEmpty ?? false) &&
++    const {
++      'codebuddy.cn',
++      'www.codebuddy.cn',
++      'workbuddy.cn',
++      'www.workbuddy.cn',
++      'codebuddy.ai',
++      'www.codebuddy.ai',
++      'workbuddy.ai',
++      'www.workbuddy.ai',
++    }.contains(url.host.toLowerCase());
++
+ Future<bool> _askWants(BuildContext context, String title, Set<String> wants) async {
+   final l10n = context.l10n;
+   final heading = wants.contains('message')
+diff --git a/app/test/plugins/native/workbuddy_login_link_test.dart b/app/test/plugins/native/workbuddy_login_link_test.dart
+new file mode 100644
+index 00000000..a7e01a05
+--- /dev/null
++++ b/app/test/plugins/native/workbuddy_login_link_test.dart
+@@ -0,0 +1,41 @@
++import 'package:dsh_app/ui/plugins/native/native_taps.dart';
++import 'package:flutter_test/flutter_test.dart';
++
++void main() {
++  test('WorkBuddy state-bound login stays inside DSH Go', () {
++    for (final host in ['www.codebuddy.cn', 'www.workbuddy.ai', 'www.codebuddy.ai']) {
++      expect(
++        isWorkBuddyInAppLoginLink('dsh-connect-workbuddy', Uri.parse('https://$host/login?state=abc')),
++        isTrue,
++      );
++    }
++  });
++
++  test('unrelated and deceptive links keep the external browser path', () {
++    for (final url in [
++      'http://www.codebuddy.cn/login?state=abc',
++      'https://www.codebuddy.cn/login',
++      'https://www.codebuddy.cn/login?state=',
++      'https://www.codebuddy.cn.evil.example/login?state=abc',
++      'https://www.codebuddy.cn:8443/login?state=abc',
++      'https://www.codebuddy.cn/account?state=abc',
++    ]) {
++      expect(
++        isWorkBuddyInAppLoginLink('dsh-connect-workbuddy', Uri.parse(url)),
++        isFalse,
++        reason: url,
++      );
++    }
++    expect(
++      isWorkBuddyInAppLoginLink(
++        'dsh-connect-workbuddy',
++        Uri(scheme: 'https', host: 'www.codebuddy.cn', userInfo: 'user', path: '/login', queryParameters: {'state': 'abc'}),
++      ),
++      isFalse,
++    );
++    expect(
++      isWorkBuddyInAppLoginLink('another-plugin', Uri.parse('https://www.codebuddy.cn/login?state=abc')),
++      isFalse,
++    );
++  });
++}

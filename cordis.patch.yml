@@ -1,0 +1,5 @@
+# Register the WorkBuddy provider without changing the profile's default
+# model. DSH Go can start the same OAuth flow from its native panel.
+- insert:
+    - id: dsh-connect-workbuddy
+      name: dsh-go-workbuddy
